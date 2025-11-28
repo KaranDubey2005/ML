@@ -1,0 +1,93 @@
+# ============================================
+# RENDER DEPLOYMENT COMMANDS - STEP BY STEP
+# ============================================
+
+# STEP 1: Verify Project Structure
+# ---------------------------------
+# Check if all files exist
+dir
+dir ml
+dir frontend
+
+# STEP 2: Install Dependencies Locally (Test First)
+# --------------------------------------------------
+pip install -r requirements.txt
+
+# STEP 3: Test Locally Before Deploying
+# --------------------------------------
+# Option A: Test with Flask directly
+python app.py
+
+# Option B: Test with Gunicorn (like Render will)
+gunicorn --bind 0.0.0.0:5000 app:app
+
+# STEP 4: Train Model (if not already done)
+# ------------------------------------------
+# If you have data.csv, run:
+python ml/preprocess.py
+python ml/train_model.py
+
+# Verify model exists:
+dir ml\model.pkl
+
+# STEP 5: Initialize Git (if not already done)
+# ---------------------------------------------
+git init
+git add .
+git commit -m "Ready for Render deployment"
+
+# STEP 6: Connect to GitHub/GitLab/Bitbucket
+# --------------------------------------------
+# Create repository on GitHub first, then:
+git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
+git branch -M main
+git push -u origin main
+
+# OR if repository already exists:
+git remote set-url origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
+git push -u origin main
+
+# STEP 7: Deploy on Render (via Dashboard)
+# -----------------------------------------
+# Go to: https://dashboard.render.com
+# Click: "New +" → "Web Service"
+# Connect your GitHub repository
+# Render will auto-detect render.yaml configuration
+
+# ============================================
+# ALTERNATIVE: Manual Render Configuration
+# ============================================
+# If not using render.yaml, use these in Render Dashboard:
+
+# Build Command:
+pip install --upgrade pip && pip install -r requirements.txt
+
+# Start Command:
+gunicorn --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120 app:app
+
+# Environment Variables:
+# PYTHON_VERSION = 3.11.0
+# FLASK_ENV = production
+
+# ============================================
+# QUICK DEPLOY (All-in-One)
+# ============================================
+# Run these commands in sequence:
+
+# 1. Install dependencies
+pip install -r requirements.txt
+
+# 2. Test locally
+python app.py
+
+# 3. Add all files to git
+git add .
+
+# 4. Commit
+git commit -m "Deploy to Render"
+
+# 5. Push to GitHub
+git push origin main
+
+# 6. Then go to Render Dashboard and connect repository
+
